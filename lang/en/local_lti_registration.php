@@ -8,6 +8,11 @@
  */
 
 $string['pluginname'] = "LTI Platform Registration";
+
+// Settings
+$string['pendingregistrations'] = "Pending registrations";
+$string['authorize'] = "Authorize";
+
 $string['generate'] = "Generate calls to Webservice";
 $string['token'] = "WS Token";
 $string['url'] = "Platform URL";
