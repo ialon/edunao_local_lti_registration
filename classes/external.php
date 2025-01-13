@@ -9,7 +9,6 @@
 
 namespace local_lti_registration;
 
-use stdClass;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_value;
@@ -62,22 +61,24 @@ class external extends external_api {
             new user_repository()
         );
 
-        $data = stdClass();
+        $data = new \stdClass();
         $data->name = $name;
         $data->platformid = $platformid;
         $data->clientid = $clientid;
 
         $registration = $regservice->create_draft_application_registration($data);
-        $regservice->update_application_registration($data);        
 
-        $pending = new stdClass();
+        $data->id = $registration->get_id();
+        $DB->update_record('enrol_lti_app_registration', $data);
+
+        $pending = new \stdClass();
         $pending->registrationid = $registration->get_id();
         $pending->openid = $openid;
         $pending->regtoken = $regtoken;
-
+        
         $result = $DB->insert_record('enrol_lti_app_registration_pending', $pending);
 
-        return ['result' => $result];
+        return ['result' => (bool) $result];
     }
 
     /**
@@ -113,7 +114,10 @@ class external extends external_api {
     public static function check_registration(string $platformid) {
         global $DB;
 
-        $result = $DB->record_exists('enrol_lti_app_registration', ['platformid' => $platformid]);
+        $sql = "SELECT *
+                  FROM {enrol_lti_app_registration}
+                 WHERE " . $DB->sql_compare_text('platformid') . ' = ' . $DB->sql_compare_text(':platformid');
+        $result = $DB->record_exists_sql($sql, ['platformid' => $platformid]);
 
         return ['result' => $result];
     }

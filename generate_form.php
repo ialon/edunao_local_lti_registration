@@ -24,36 +24,30 @@ class generate_form extends moodleform {
 
         $mform =& $this->_form;
 
-        // WS Token
+        // Select action.
+        $options = [
+            'local_lti_check' => get_string('check_registration', 'local_lti_registration'),
+            'local_lti_registration' => get_string('register_platform', 'local_lti_registration')
+        ];
+        $mform->addElement('select', 'action', get_string('action', 'local_lti_registration'), $options);
+
+        // Tool URL.
+        $mform->addElement('text', 'url', get_string('url', 'local_lti_registration'));
+        $mform->setType('url', PARAM_URL);
+        // Local
+        $mform->setDefault('url', 'http://edunao.local');
+        // Mako Moodle
+        // $mform->setDefault('url', 'https://moodle.mako.digital');
+
+        // WS Token.
         $mform->addElement('text', 'token', get_string('token', 'local_lti_registration'));
         $mform->setType('token', PARAM_TEXT);
         // Local
-        // $mform->setDefault('token', '00972cdf9b4c2bdd51a3a046c55d0829');
+        $mform->setDefault('token', '00972cdf9b4c2bdd51a3a046c55d0829');
         // Mako Moodle
-        $mform->setDefault('token', '1a515f7c4a7f138d98386a28ecabfa2b');
-
-        // Platform URL
-        $mform->addElement('text', 'url', get_string('url', 'local_lti_registration'));
-        $mform->setType('url', PARAM_URL);
-        $mform->setDefault('url', 'https://sandbox.moodledemo.net');
-
-        // Platform name
-        $mform->addElement('text', 'name', get_string('sitename', 'hub'), array('maxlength' => 255));
-        $mform->setType('name', PARAM_TEXT);
-        $mform->addHelpButton('name', 'sitename', 'hub');
-        $mform->setDefault('name', 'Moodle Demo');
-
-        // OpenID configuration URL
-        $mform->addElement('text', 'openid', get_string('openid_configuration', 'local_lti_registration'));
-        $mform->setType('openid', PARAM_URL);
-        $mform->setDefault('openid', 'https://sandbox.moodledemo.net/mod/lti/openid-configuration.php');
-
-        // Registration token
-        $mform->addElement('text', 'registration_token', get_string('registration_token', 'local_lti_registration'));
-        $mform->setType('registration_token', PARAM_TEXT);
-        $mform->setDefault('registration_token', '0992496d6c75fc29f98ec4dc978c145abe0f3400f2bfd68e9191d58df976');
+        // $mform->setDefault('token', 'a662fd3fc60f5aa3c82f387195342b58');
 
         // Buttons.
-        $this->add_action_buttons(true, get_string('savechanges'));
+        $this->add_action_buttons(true, get_string('submit'));
     }
 }

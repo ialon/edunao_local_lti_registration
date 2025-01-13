@@ -13,8 +13,14 @@ $string['pluginname'] = "LTI Platform Registration";
 $string['pendingregistrations'] = "Pending registrations";
 $string['authorize'] = "Authorize";
 
+// Test form
 $string['generate'] = "Generate calls to Webservice";
+$string['action'] = "Select call";
+$string['check_registration'] = "Check registration";
+$string['register_platform'] = "Register platform";
+$string['url'] = "Tool URL";
 $string['token'] = "WS Token";
-$string['url'] = "Platform URL";
-$string['openid_configuration'] = "OpenID configuration URL";
-$string['registration_token'] = "Registration token";
+$string['local_lti_check_success'] = "Platform is already registered";
+$string['local_lti_check_error'] = "Platform is not registered";
+$string['local_lti_registration_success'] = "Platform registered successfully";
+$string['local_lti_registration_error'] = "Platform registration failed";
