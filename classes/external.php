@@ -9,6 +9,7 @@
 
 namespace local_lti_registration;
 
+use stdClass;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_value;
@@ -31,6 +32,8 @@ class external extends external_api {
         return new external_function_parameters(
             array(
                 'name' => new external_value(PARAM_TEXT, 'The platform\'s name'),
+                'platformid' => new external_value(PARAM_URL, 'The platform\'s URL'),
+                'clientid' => new external_value(PARAM_TEXT, 'The platform\'s Client ID'),
                 'openid' => new external_value(PARAM_URL, 'The platform\'s OpenID configuration URL'),
                 'registration_token' => new external_value(PARAM_RAW, 'The registration token')
             )
@@ -41,11 +44,15 @@ class external extends external_api {
      * Register an LTI platform.
      *
      * @param  string $name
+     * @param  string $platformid
+     * @param  string $clientid
      * @param  string $openid
      * @param  string $regtoken
-     * @return void
+     * @return array
      */
-    public static function register_platform(string $name, string $openid, string $regtoken) {
+    public static function register_platform(string $name, string $platformid, string $clientid, string $openid, string $regtoken) {
+        global $DB;
+
         // Create an incomplete registration.
         $regservice = new application_registration_service(
             new application_registration_repository(),
@@ -54,24 +61,35 @@ class external extends external_api {
             new context_repository(),
             new user_repository()
         );
-        $draft = $regservice->create_draft_application_registration((object) ['name' => $name]);
 
-        // Get the registration URL
-        $regrepo = new application_registration_repository();
-        $registration = $regrepo->find($draft->get_id());
-        $regurl = new \moodle_url('/enrol/lti/register.php', ['token' => $registration->get_uniqueid()]);
-        $regurl->param('openid_configuration', $openid);
-        $regurl->param('registration_token', $regtoken);
-        
-        redirect($regurl);
+        $data = stdClass();
+        $data->name = $name;
+        $data->platformid = $platformid;
+        $data->clientid = $clientid;
+
+        $registration = $regservice->create_draft_application_registration($data);
+        $regservice->update_application_registration($data);        
+
+        $pending = new stdClass();
+        $pending->registrationid = $registration->get_id();
+        $pending->openid = $openid;
+        $pending->regtoken = $regtoken;
+
+        $result = $DB->insert_record('enrol_lti_app_registration_pending', $pending);
+
+        return ['result' => $result];
     }
 
     /**
      * register_platform return
      *
-     * @return \core_external\external_description
+     * @return \core_external\external_single_structure
      */
-    public static function register_platform_returns(): void {}
+    public static function register_platform_returns() {
+        return new external_single_structure([
+            'result' => new external_value(PARAM_BOOL, 'Result (successfully registered or not)')
+        ]);
+    }
 
     /**
      * check_registration parameters.
@@ -81,7 +99,7 @@ class external extends external_api {
     public static function check_registration_parameters() {
         return new external_function_parameters(
             array(
-                'url' => new external_value(PARAM_URL, 'The platform\'s URL'),
+                'platformid' => new external_value(PARAM_URL, 'The platform\'s URL'),
             )
         );
     }
@@ -89,13 +107,13 @@ class external extends external_api {
     /**
      * Check if the platform is already registered
      *
-     * @param  string $url
+     * @param  string $platformid
      * @return array Contains the result of the check
      */
-    public static function check_registration(string $url) {
+    public static function check_registration(string $platformid) {
         global $DB;
 
-        $result = $DB->record_exists('enrol_lti_app_registration', ['platformid' => $url]);
+        $result = $DB->record_exists('enrol_lti_app_registration', ['platformid' => $platformid]);
 
         return ['result' => $result];
     }
@@ -103,7 +121,7 @@ class external extends external_api {
     /**
      * check_registration return
      *
-     * @return \core_external\external_description
+     * @return \core_external\external_single_structure
      */
     public static function check_registration_returns() {
         return new external_single_structure([
