@@ -26,8 +26,6 @@ $generateform = new generate_form('generate.php');
 if ($generateform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/lti_registration/generate.php');
 } else if ($data = $generateform->get_data()) {
-    echo $OUTPUT->header();
-
     $result = \local_lti_registration\webservice::call($data->action, $data->url, $data->token);
 
     if ($result) {
@@ -38,6 +36,7 @@ if ($generateform->is_cancelled()) {
         $type = \core\output\notification::NOTIFY_ERROR;
     }
 
+    echo $OUTPUT->header();
     echo $OUTPUT->notification($message, $type);
 
     $generateform->set_data($data);

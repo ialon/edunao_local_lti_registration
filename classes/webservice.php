@@ -102,6 +102,11 @@ class webservice {
             throw new \Exception((string) $response);
         }
 
+        if ($decoded->result && isset($decoded->registrationurl)) {
+            $message = get_string('local_lti_registration_approved', 'local_lti_registration');
+            redirect($decoded->registrationurl, $message, null, \core\output\notification::NOTIFY_SUCCESS);
+        }
+
         return $decoded->result;
     }
 }

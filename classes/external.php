@@ -52,6 +52,12 @@ class external extends external_api {
     public static function register_platform(string $name, string $platformid, string $clientid, string $openid, string $regtoken) {
         global $DB;
 
+        // Check if the platform is already registered.
+        $registered = self::check_registration($platformid);
+        if ($registered['result']) {
+            return $registered;
+        }
+
         // Create an incomplete registration.
         $regservice = new application_registration_service(
             new application_registration_repository(),
@@ -68,17 +74,32 @@ class external extends external_api {
 
         $registration = $regservice->create_draft_application_registration($data);
 
-        $data->id = $registration->get_id();
-        $DB->update_record('enrol_lti_app_registration', $data);
-
-        $pending = new \stdClass();
-        $pending->registrationid = $registration->get_id();
-        $pending->openid = $openid;
-        $pending->regtoken = $regtoken;
-        
-        $result = $DB->insert_record('enrol_lti_app_registration_pending', $pending);
-
-        return ['result' => (bool) $result];
+        if ($autoapprove = get_config('local_lti_registration_autoapprove')) {
+            // Get the registration URL.
+            $regrepo = new application_registration_repository();
+            $registration = $regrepo->find($registration->get_id());
+            $regurl = new \moodle_url('/enrol/lti/register.php', ['token' => $registration->get_uniqueid()]);
+            $regurl->param('openid_configuration', $openid);
+            $regurl->param('registration_token', $regtoken);
+            
+            return [
+                'result' => true,
+                'registrationurl' => $regurl->out()
+            ];
+        } else {
+            // Registration is pending approval.
+            $data->id = $registration->get_id();
+            $DB->update_record('enrol_lti_app_registration', $data);
+    
+            $pending = new \stdClass();
+            $pending->registrationid = $registration->get_id();
+            $pending->openid = $openid;
+            $pending->regtoken = $regtoken;
+            
+            $result = $DB->insert_record('enrol_lti_app_registration_pending', $pending);
+    
+            return ['result' => (bool) $result];
+        }
     }
 
     /**
@@ -88,7 +109,8 @@ class external extends external_api {
      */
     public static function register_platform_returns() {
         return new external_single_structure([
-            'result' => new external_value(PARAM_BOOL, 'Result (successfully registered or not)')
+            'result' => new external_value(PARAM_BOOL, 'Result (successfully registered or not)'),
+            'registrationurl' => new external_value(PARAM_URL, 'The registration URL', VALUE_OPTIONAL)
         ]);
     }
 
