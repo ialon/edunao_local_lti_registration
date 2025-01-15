@@ -24,7 +24,8 @@ class renderer extends plugin_renderer_base {
         global $DB;
 
         $registrationscontext = [
-            'registrations' => []
+            'registrations' => [],
+            'autoapprove' => get_config('local_lti_registration_autoapprove')
         ];
         $registrationscontext['hasregs'] = count($registrations) > 0;
         foreach ($registrations as $reg) {

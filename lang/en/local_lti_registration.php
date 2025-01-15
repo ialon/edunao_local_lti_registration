@@ -12,6 +12,8 @@ $string['pluginname'] = "LTI Platform Registration";
 // Settings
 $string['pendingregistrations'] = "Pending registrations";
 $string['authorize'] = "Authorize";
+$string['autoapprove'] = "Auto approve";
+$string['autoapprove_desc'] = "Automatically approve new registrations";
 
 // Test form
 $string['generate'] = "Generate calls to Webservice";
