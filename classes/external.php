@@ -74,7 +74,7 @@ class external extends external_api {
 
         $registration = $regservice->create_draft_application_registration($data);
 
-        if ($autoapprove = get_config('local_lti_registration_autoapprove')) {
+        if ($autoapprove = get_config('local_lti_registration', 'autoapprove')) {
             // Get the registration URL.
             $regrepo = new application_registration_repository();
             $registration = $regrepo->find($registration->get_id());

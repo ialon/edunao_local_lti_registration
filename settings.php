@@ -19,7 +19,7 @@ $settings = new admin_settingpage(
 
 $settings->add(
     new admin_setting_configcheckbox(
-        'local_lti_registration_autoapprove',
+        'local_lti_registration/autoapprove',
         get_string('autoapprove', 'local_lti_registration'),
         get_string('autoapprove_desc', 'local_lti_registration'),
         1
