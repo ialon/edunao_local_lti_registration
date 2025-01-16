@@ -29,7 +29,10 @@ class renderer extends plugin_renderer_base {
         ];
         $registrationscontext['hasregs'] = count($registrations) > 0;
         foreach ($registrations as $reg) {
-            $pending = $DB->get_record('enrol_lti_app_registration_pending', ['registrationid' => $reg->get_id()], '*', MUST_EXIST);
+            if (!$pending = $DB->get_record('enrol_lti_app_registration_pending', ['registrationid' => $reg->get_id()])) {
+                continue;
+            }
+
             $regparams = [
                 'token' => $reg->get_uniqueid(),
                 'openid_configuration' => $pending->openid,
