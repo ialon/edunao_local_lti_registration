@@ -16,6 +16,10 @@ $string['nopendingregistrations'] = "No pending registrations";
 $string['autoapprove'] = "Auto approve";
 $string['autoapprove_desc'] = "Automatically approve new registrations";
 
+// Notification email
+$string['notify_registration_subject'] = "New LTI platform registered";
+$string['notify_registration_body'] = 'A new LTI platform has been registered. Name: {$a->name}, Issuer: {$a->issuer}';
+
 // Test form
 $string['generate'] = "Generate calls to Webservice";
 $string['action'] = "Select call";

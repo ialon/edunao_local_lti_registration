@@ -45,6 +45,7 @@ use enrol_lti\local\ltiadvantage\service\application_registration_service;
 require_once(__DIR__."/../../config.php");
 global $OUTPUT, $PAGE, $CFG, $SITE;
 require_once($CFG->libdir . '/filelib.php');
+require_once($CFG->dirroot . '/local/lti_registration/lib.php');
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/local/lti_registration/register.php');
@@ -195,6 +196,8 @@ if ($regresponse) {
         }
     }
 }
+
+notify_registration($appreg);
 
 $returnurl = new moodle_url($returnurl);
 $returnurl->param('tooldomain', $CFG->wwwroot);
