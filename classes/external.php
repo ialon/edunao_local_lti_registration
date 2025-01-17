@@ -78,7 +78,7 @@ class external extends external_api {
             // Get the registration URL.
             $regrepo = new application_registration_repository();
             $registration = $regrepo->find($registration->get_id());
-            $regurl = new \moodle_url('/enrol/lti/register.php', ['token' => $registration->get_uniqueid()]);
+            $regurl = new \moodle_url('/local/lti_registration/register.php', ['token' => $registration->get_uniqueid()]);
             $regurl->param('openid_configuration', $openid);
             $regurl->param('registration_token', $regtoken);
             

@@ -8,6 +8,9 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot . '/mod/lti/locallib.php');
+
+$tooldomain = optional_param('tooldomain', null, PARAM_LOCALURL);
 
 require_login();
 
@@ -26,6 +29,8 @@ $generateform = new generate_form('generate.php');
 if ($generateform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/lti_registration/generate.php');
 } else if ($data = $generateform->get_data()) {
+    $generateform->set_data($data);
+
     $result = \local_lti_registration\webservice::call($data->action, $data->url, $data->token);
 
     if ($result) {
@@ -35,15 +40,27 @@ if ($generateform->is_cancelled()) {
         $message = get_string($data->action . '_error', 'local_lti_registration');
         $type = \core\output\notification::NOTIFY_ERROR;
     }
-
-    echo $OUTPUT->header();
-    echo $OUTPUT->notification($message, $type);
-
-    $generateform->set_data($data);
-    $generateform->display();
-} else {
-    echo $OUTPUT->header();
-    $generateform->display();
 }
+
+// Activate the tool on the client side
+if ($tooldomain && confirm_sesskey()) {
+    $types = lti_get_tools_by_url($tooldomain, LTI_TOOL_STATE_PENDING);
+    if ($type = reset($types)) {
+        $type->state = LTI_TOOL_STATE_CONFIGURED;
+        lti_update_type($type, new stdClass());
+
+        $message = get_string('local_lti_registration_approved', 'local_lti_registration');
+        $type = \core\output\notification::NOTIFY_SUCCESS;
+    }
+
+}
+
+echo $OUTPUT->header();
+
+if (isset($message)) {
+    echo $OUTPUT->notification($message, $type);
+}
+
+$generateform->display();
 
 echo $OUTPUT->footer();

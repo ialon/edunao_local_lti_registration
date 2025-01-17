@@ -63,7 +63,7 @@ class webservice {
      * @return bool
      */
     public static function register_platform(string $toolurl, string $token): bool {
-        global $CFG, $SITE;
+        global $CFG, $SITE, $PAGE;
 
         // Open ID configuration
         $confurl = new \moodle_url('/mod/lti/openid-configuration.php');
@@ -103,8 +103,11 @@ class webservice {
         }
 
         if ($decoded->result && isset($decoded->registrationurl)) {
-            $message = get_string('local_lti_registration_approved', 'local_lti_registration');
-            redirect($decoded->registrationurl, $message, null, \core\output\notification::NOTIFY_SUCCESS);
+            $registrationurl = new \moodle_url($decoded->registrationurl);
+            $callbackurl = $PAGE->url;
+            $callbackurl->param('sesskey', sesskey());
+            $registrationurl->param('returnurl', $callbackurl);
+            redirect($registrationurl);
         }
 
         return $decoded->result;
