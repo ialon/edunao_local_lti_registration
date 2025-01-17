@@ -10,7 +10,8 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
-$tooldomain = optional_param('tooldomain', null, PARAM_LOCALURL);
+$clientid = optional_param('clientid', null, PARAM_TEXT);
+$tooldomain = optional_param('tooldomain', null, PARAM_URL);
 
 require_login();
 
@@ -43,16 +44,20 @@ if ($generateform->is_cancelled()) {
 }
 
 // Activate the tool on the client side
-if ($tooldomain && confirm_sesskey()) {
-    $types = lti_get_tools_by_url($tooldomain, LTI_TOOL_STATE_PENDING);
-    if ($type = reset($types)) {
-        $type->state = LTI_TOOL_STATE_CONFIGURED;
-        lti_update_type($type, new stdClass());
+if ($clientid && $tooldomain) {
+    $domain = lti_get_domain_from_url(new moodle_url($tooldomain));
+    $conditions = [
+        'state' => LTI_TOOL_STATE_PENDING,
+        'clientid' => $clientid,
+        'tooldomain' => $domain,
+    ];
+    if ($ltitype = $DB->get_record('lti_types', $conditions)) {
+        $ltitype->state = LTI_TOOL_STATE_CONFIGURED;
+        $DB->update_record('lti_types', $ltitype);
 
         $message = get_string('local_lti_registration_approved', 'local_lti_registration');
         $type = \core\output\notification::NOTIFY_SUCCESS;
     }
-
 }
 
 echo $OUTPUT->header();

@@ -104,9 +104,7 @@ class webservice {
 
         if ($decoded->result && isset($decoded->registrationurl)) {
             $registrationurl = new \moodle_url($decoded->registrationurl);
-            $callbackurl = $PAGE->url;
-            $callbackurl->param('sesskey', sesskey());
-            $registrationurl->param('returnurl', $callbackurl);
+            $registrationurl->param('returnurl', $PAGE->url);
             redirect($registrationurl);
         }
 

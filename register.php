@@ -60,7 +60,7 @@ $regtoken = optional_param('registration_token', null, PARAM_RAW);
 $token = required_param('token', PARAM_ALPHANUM);
 
 // URL to redirect to after registration is complete.
-$returnurl = optional_param('returnurl', '/', PARAM_LOCALURL);
+$returnurl = optional_param('returnurl', '/', PARAM_URL);
 
 $appregservice = new application_registration_service(
     new application_registration_repository(),
@@ -194,11 +194,16 @@ if ($regresponse) {
             $deploymentrepo = new deployment_repository();
             $deploymentrepo->save($deployment);
         }
+
+        // Notify admins of the new registration.
+        notify_registration($appreg);
+
+        // Redirect to the return URL with the client id and tool domain.
+        $returnurl = new moodle_url($returnurl);
+        $returnurl->param('clientid', $regresponse->client_id);
+        $returnurl->param('tooldomain', $CFG->wwwroot);
+        redirect($returnurl);
     }
 }
 
-notify_registration($appreg);
-
-$returnurl = new moodle_url($returnurl);
-$returnurl->param('tooldomain', $CFG->wwwroot);
 redirect($returnurl);
